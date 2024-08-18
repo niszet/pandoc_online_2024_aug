@@ -95,6 +95,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#テンプレートに値をセットする方法" id="toc-テンプレートに値をセットする方法" class="nav-link" data-scroll-target="#テンプレートに値をセットする方法">テンプレートに値をセットする方法</a></li>
   <li><a href="#デフォルトファイルdefaults-filesも使える" id="toc-デフォルトファイルdefaults-filesも使える" class="nav-link" data-scroll-target="#デフォルトファイルdefaults-filesも使える">デフォルトファイル(Defaults files)も使える</a></li>
   <li><a href="#テンプレートの文法変数" id="toc-テンプレートの文法変数" class="nav-link" data-scroll-target="#テンプレートの文法変数">テンプレートの文法(変数)</a></li>
+  <li><a href="#テンプレートの文法if" id="toc-テンプレートの文法if" class="nav-link" data-scroll-target="#テンプレートの文法if">テンプレートの文法(if)</a></li>
   <li><a href="#テンプレートの文法for" id="toc-テンプレートの文法for" class="nav-link" data-scroll-target="#テンプレートの文法for">テンプレートの文法(for)</a></li>
   <li><a href="#サブテンプレートpartials" id="toc-サブテンプレートpartials" class="nav-link" data-scroll-target="#サブテンプレートpartials">サブテンプレート（Partials）</a></li>
   <li><a href="#テンプレートの文法pipes" id="toc-テンプレートの文法pipes" class="nav-link" data-scroll-target="#テンプレートの文法pipes">テンプレートの文法（Pipes）</a></li>
@@ -238,7 +239,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>基本的な手順
 <ul>
 <li>適宜修正したテンプレートに変数/メタデータで値を埋め込みファイルを作成</li>
-<li>最終的な出力を作る際に、出来上がったファイルを<code>--include-before(after)-body</code>で取り込み挿入する。</li>
+<li>最終的な出力を作る際に、出来上がったファイルを<code>--include-before-body</code>や<code>--include-after-body</code>で取り込み挿入する。</li>
 </ul></li>
 </ul>
 </section>
@@ -363,8 +364,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>変数名に<code>.</code>を入れると上記の仕様からテンプレート側からアクセス出来なくなるので注意。</li>
 <li>YAMLメタデータブロックでは末尾<code>_</code>の変数名は無視されるが、<code>-M</code>や<code>-V</code>は無視されない。
 <ul>
-<li><a href="https://pandoc.org/MANUAL.html#extension-yaml_metadata_block">Pandoc User’s Guide　— Extension:&nbsp;<code>yaml_metadata_block</code></a> ## テンプレートの文法(if)</li>
+<li><a href="https://pandoc.org/MANUAL.html#extension-yaml_metadata_block">Pandoc User’s Guide　— Extension:&nbsp;<code>yaml_metadata_block</code></a></li>
 </ul></li>
+</ul>
+</section>
+<section id="テンプレートの文法if" class="level2">
+<h2 class="anchored" data-anchor-id="テンプレートの文法if">テンプレートの文法(if)</h2>
+<ul>
 <li>テンプレート中で<code>$if(変数)$</code>などで 条件分岐が使える。ただし、<code>true</code>か<code>false</code>かだけを判定。比較演算子等はない。
 <ul>
 <li><code>$elseif(変数)</code>や<code>$else$</code>もあるのである程度分岐は出来る。
@@ -611,7 +617,7 @@ $endfor$</code></pre>
 <section id="テンプレートを修正する" class="level2">
 <h2 class="anchored" data-anchor-id="テンプレートを修正する">テンプレートを修正する</h2>
 <ol type="1">
-<li><code>include-before-body</code>　や <code>include-after-body</code> を使いdocxファイルに挿入する場合、挿入箇所にファイルの内容をそのまま追加して、全体で正しいファイルとなるようにしないといけないの
+<li><code>--include-before-body</code>　や <code>--include-after-body</code> を使いdocxファイルに挿入する場合、挿入箇所にファイルの内容をそのまま追加して、全体で正しいファイルとなるようにしないといけないの
 <ol type="1">
 <li>ファイル先頭の <code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;</code> <code>&lt;document&gt;</code> <code>&lt;w:body&gt;</code> タグと末尾の対応するタグをそれぞれ削除する。</li>
 </ol></li>
@@ -706,7 +712,7 @@ $endfor$</code></pre>
 <div class="sourceCode" id="cb7"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> <span class="at">--from</span> markdown&nbsp;input.md&nbsp;--to docx <span class="at">--include-before-body</span><span class="op">=</span>template.filled.openxml <span class="at">-o</span> out.docx <span class="at">--toc</span> <span class="at">--reference-doc</span> custom_reference.docx</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>カスタム表紙作成の場合、本体の方には挿入するファイルで指定した <code>title</code> などのメタデータを与えないようにする(当然、2回出てくる)</li>
-<li>挿入場所はTemplateの構成が参考になる（<code>include-before-body</code>とか）</li>
+<li>挿入場所はTemplateの構成が参考になる（<code>--include-before-body</code>とか）</li>
 </ul>
 </section>
 <section id="補足-メタデータの強弱1.原則" class="level2">
