@@ -92,6 +92,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#pandocs-template-導入編" id="toc-pandocs-template-導入編" class="nav-link" data-scroll-target="#pandocs-template-導入編">Pandoc’s Template 導入編</a>
   <ul class="collapse">
   <li><a href="#pandocのテンプレート機能" id="toc-pandocのテンプレート機能" class="nav-link" data-scroll-target="#pandocのテンプレート機能">Pandocのテンプレート機能</a></li>
+  <li><a href="#テンプレートに値をセットする方法" id="toc-テンプレートに値をセットする方法" class="nav-link" data-scroll-target="#テンプレートに値をセットする方法">テンプレートに値をセットする方法</a></li>
   <li><a href="#デフォルトファイルdefaults-filesも使える" id="toc-デフォルトファイルdefaults-filesも使える" class="nav-link" data-scroll-target="#デフォルトファイルdefaults-filesも使える">デフォルトファイル(Defaults files)も使える</a></li>
   <li><a href="#テンプレートの文法変数" id="toc-テンプレートの文法変数" class="nav-link" data-scroll-target="#テンプレートの文法変数">テンプレートの文法(変数)</a></li>
   <li><a href="#テンプレートの文法for" id="toc-テンプレートの文法for" class="nav-link" data-scroll-target="#テンプレートの文法for">テンプレートの文法(for)</a></li>
@@ -278,16 +279,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="pandocのテンプレート機能" class="level2">
 <h2 class="anchored" data-anchor-id="pandocのテンプレート機能">Pandocのテンプレート機能</h2>
 <ul>
-<li><p>変数を使い、テンプレート内に文字列を挿入するなどしてファイルを作ることが出来る。</p>
+<li>変数を使い、テンプレート内に文字列を挿入するなどしてファイルを作ることが出来る。
 <ul>
 <li><a href="https://pandoc.org/MANUAL.html#templates">Pandoc User’s Guide — Template</a></li>
 </ul></li>
-<li><p>Pandoc単体で実行可能</p>
+<li>Pandoc単体で実行可能
 <ul>
 <li>環境構築せずすぐ使える</li>
 </ul></li>
-<li><p>Templateにはifやforなどがあるので色々出来そうだが出来ない。</p></li>
-<li><p>基本的なフォーマットが決まっていて値を置き換えるのに使う。</p>
+<li>Templateにはifやforなどがあるので色々出来そうだが出来ない。</li>
+<li>基本的なフォーマットが決まっていて値を置き換えるのに使う。
 <ul>
 <li>ifは値があるかないかチェックでの分岐</li>
 <li>forは全ての要素それぞれで置換して列挙</li>
@@ -295,7 +296,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>その他体裁を整える機能（Nesting、Breakable Spaces）</li>
 <li>変数の文字列に対する処理（Pipe）</li>
 </ul></li>
-<li><p>複雑な処理をしたければLua filterを使う。 ## テンプレートに値をセットする方法</p></li>
+<li>複雑な処理をしたければLua filterを使う。</li>
+</ul>
+</section>
+<section id="テンプレートに値をセットする方法" class="level2">
+<h2 class="anchored" data-anchor-id="テンプレートに値をセットする方法">テンプレートに値をセットする方法</h2>
+<ul>
 <li><p>データの種類としては変数（Variable）とメタデータがある。</p></li>
 <li><p>メタデータは一般的に（？）MarkdownファイルのYAMLブロックに入れる事が多いが引数（<code>-M/--metadata</code>）でも与えられる。</p></li>
 <li><p>テンプレートの場合は変数の方がメタデータより優先される。</p>
@@ -370,7 +376,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>true</code>となるものは以下の通り
 <ul>
 <li>連想配列（map。<code>key: value</code>のもの）</li>
-</ul></li>
 <li>配列（array, list）のうち、少なくともひとつの<code>true</code>の値をもつもの
 <ul>
 <li>listの中身が全て<code>""</code>なら<code>false</code></li>
@@ -379,6 +384,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>booleanの<code>true</code>。<code>-M title</code>のように与えると<code>title</code>はbooleanの<code>true</code>扱い。
 <ul>
 <li><code>-M title=true</code>も同じ。<code>-M title=false</code> は booleanの<code>false</code>扱い。</li>
+</ul></li>
 </ul></li>
 </ul>
 </section>
