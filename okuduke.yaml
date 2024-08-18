@@ -1,0 +1,30 @@
+---
+title: PandocのWordテンプレート機能を試してみる
+subtitle: すごくつらい！
+author: niszet
+
+okuduke:
+  message:
+    - 無断掲載禁止！
+    - 不備があったら連絡してね！
+  rev:
+    - revision: 初版
+      date: 2024年8月13日
+    - revision: 2版
+      date: 2024年8月15日
+  okuduke:
+    - key: 発行
+      value: niszet工房
+    - key: 著者
+      value: niszet0
+    - key: 連絡先
+      value: niszet_dev@gmail.com
+    - key: Twitter
+      value: \@niszet0
+    - key: Webサイト
+      value:  https://niszet.hatenablog.com/
+    - key: 印刷所
+      value: niszet工房内プリンタ
+---
+
+

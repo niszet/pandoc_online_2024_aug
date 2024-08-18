@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.552">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="niszet">
+<meta name="dcterms.date" content="2024-08-18">
+
+<title>WordのTemplate機能が実装されたので試してみた</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Pandoc presentation_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Pandoc presentation_files/libs/quarto-html/quarto.js"></script>
+<script src="Pandoc presentation_files/libs/quarto-html/popper.min.js"></script>
+<script src="Pandoc presentation_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Pandoc presentation_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Pandoc presentation_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Pandoc presentation_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Pandoc presentation_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Pandoc presentation_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Pandoc presentation_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#前書き" id="toc-前書き" class="nav-link active" data-scroll-target="#前書き">前書き</a>
+  <ul class="collapse">
+  <li><a href="#metadata" id="toc-metadata" class="nav-link" data-scroll-target="#metadata">Metadata</a></li>
+  <li><a href="#おことわり" id="toc-おことわり" class="nav-link" data-scroll-target="#おことわり">おことわり</a></li>
+  <li><a href="#現時点で何が出来るのか" id="toc-現時点で何が出来るのか" class="nav-link" data-scroll-target="#現時点で何が出来るのか">現時点で何が出来るのか？</a></li>
+  <li><a href="#docxならではの事情" id="toc-docxならではの事情" class="nav-link" data-scroll-target="#docxならではの事情">docxならではの事情</a></li>
+  <li><a href="#現時点で何が出来ないのか" id="toc-現時点で何が出来ないのか" class="nav-link" data-scroll-target="#現時点で何が出来ないのか">現時点で何が出来ないのか？</a></li>
+  </ul></li>
+  <li><a href="#pandocs-template-導入編" id="toc-pandocs-template-導入編" class="nav-link" data-scroll-target="#pandocs-template-導入編">Pandoc’s Template 導入編</a>
+  <ul class="collapse">
+  <li><a href="#pandocのテンプレート機能" id="toc-pandocのテンプレート機能" class="nav-link" data-scroll-target="#pandocのテンプレート機能">Pandocのテンプレート機能</a></li>
+  <li><a href="#デフォルトファイルdefaults-filesも使える" id="toc-デフォルトファイルdefaults-filesも使える" class="nav-link" data-scroll-target="#デフォルトファイルdefaults-filesも使える">デフォルトファイル(Defaults files)も使える</a></li>
+  <li><a href="#テンプレートの文法変数" id="toc-テンプレートの文法変数" class="nav-link" data-scroll-target="#テンプレートの文法変数">テンプレートの文法(変数)</a></li>
+  <li><a href="#テンプレートの文法for" id="toc-テンプレートの文法for" class="nav-link" data-scroll-target="#テンプレートの文法for">テンプレートの文法(for)</a></li>
+  <li><a href="#サブテンプレートpartials" id="toc-サブテンプレートpartials" class="nav-link" data-scroll-target="#サブテンプレートpartials">サブテンプレート（Partials）</a></li>
+  <li><a href="#テンプレートの文法pipes" id="toc-テンプレートの文法pipes" class="nav-link" data-scroll-target="#テンプレートの文法pipes">テンプレートの文法（Pipes）</a></li>
+  <li><a href="#テンプレートの文法-nesting-breakable-spaces" id="toc-テンプレートの文法-nesting-breakable-spaces" class="nav-link" data-scroll-target="#テンプレートの文法-nesting-breakable-spaces">テンプレートの文法 （Nesting、 Breakable spaces）</a></li>
+  </ul></li>
+  <li><a href="#pandocs-template-実践編" id="toc-pandocs-template-実践編" class="nav-link" data-scroll-target="#pandocs-template-実践編">Pandoc’s Template 実践編</a>
+  <ul class="collapse">
+  <li><a href="#実践-カスタム表紙を作ってみる" id="toc-実践-カスタム表紙を作ってみる" class="nav-link" data-scroll-target="#実践-カスタム表紙を作ってみる">実践: カスタム表紙を作ってみる</a></li>
+  <li><a href="#テンプレートを作成する" id="toc-テンプレートを作成する" class="nav-link" data-scroll-target="#テンプレートを作成する">テンプレートを作成する</a>
+  <ul class="collapse">
+  <li><a href="#default.template.openxml" id="toc-default.template.openxml" class="nav-link" data-scroll-target="#default.template.openxml">default.template.openxml</a></li>
+  </ul></li>
+  <li><a href="#テンプレートを修正する" id="toc-テンプレートを修正する" class="nav-link" data-scroll-target="#テンプレートを修正する">テンプレートを修正する</a></li>
+  <li><a href="#テンプレートを使用する" id="toc-テンプレートを使用する" class="nav-link" data-scroll-target="#テンプレートを使用する">テンプレートを使用する</a></li>
+  <li><a href="#テンプレート変数の細かい話" id="toc-テンプレート変数の細かい話" class="nav-link" data-scroll-target="#テンプレート変数の細かい話">テンプレート変数の細かい話</a></li>
+  <li><a href="#作成したファイルを確認する" id="toc-作成したファイルを確認する" class="nav-link" data-scroll-target="#作成したファイルを確認する">作成したファイルを確認する</a></li>
+  <li><a href="#作成したファイルを挿入する" id="toc-作成したファイルを挿入する" class="nav-link" data-scroll-target="#作成したファイルを挿入する">作成したファイルを挿入する</a></li>
+  <li><a href="#補足-メタデータの強弱1.原則" id="toc-補足-メタデータの強弱1.原則" class="nav-link" data-scroll-target="#補足-メタデータの強弱1.原則">補足: メタデータの強弱(1.原則)</a></li>
+  <li><a href="#補足-メタデータの強弱2.同強度で複数指定した場合" id="toc-補足-メタデータの強弱2.同強度で複数指定した場合" class="nav-link" data-scroll-target="#補足-メタデータの強弱2.同強度で複数指定した場合">補足: メタデータの強弱(2.同強度で複数指定した場合)</a></li>
+  <li><a href="#補足-メタデータの強弱3-defaults-files-と--m-の衝突" id="toc-補足-メタデータの強弱3-defaults-files-と--m-の衝突" class="nav-link" data-scroll-target="#補足-メタデータの強弱3-defaults-files-と--m-の衝突">補足: メタデータの強弱(3 Defaults files と -M の衝突）</a></li>
+  <li><a href="#補足-どうにかして入植した値をキャンセルできないのか" id="toc-補足-どうにかして入植した値をキャンセルできないのか" class="nav-link" data-scroll-target="#補足-どうにかして入植した値をキャンセルできないのか">補足: どうにかして入植した値をキャンセルできないのか･･･</a></li>
+  <li><a href="#番外編-2段組からの切り替え" id="toc-番外編-2段組からの切り替え" class="nav-link" data-scroll-target="#番外編-2段組からの切り替え">番外編 2段組からの切り替え</a></li>
+  <li><a href="#実践-奥付を作ってみる" id="toc-実践-奥付を作ってみる" class="nav-link" data-scroll-target="#実践-奥付を作ってみる">実践: 奥付を作ってみる</a></li>
+  </ul></li>
+  <li><a href="#完全に余談" id="toc-完全に余談" class="nav-link" data-scroll-target="#完全に余談">完全に余談</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">WordのTemplate機能が実装されたので試してみた</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>niszet </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 18, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="前書き" class="level1">
+<h1>前書き</h1>
+<section id="metadata" class="level2">
+<h2 class="anchored" data-anchor-id="metadata">Metadata</h2>
+<ul>
+<li>name
+<ul>
+<li>niszet</li>
+</ul></li>
+<li>pandoc:
+<ul>
+<li>久々にPandoc。</li>
+<li>テンプレート機能は使ったことない</li>
+<li>PandocのWord関連は地味に更新が入っていて追いかけ中。</li>
+</ul></li>
+<li>activity:
+<ul>
+<li>木を切る</li>
+<li>楽器を弾く</li>
+<li>Pandocする</li>
+</ul></li>
+</ul>
+</section>
+<section id="おことわり" class="level2">
+<h2 class="anchored" data-anchor-id="おことわり">おことわり</h2>
+<ul>
+<li>今回はPandoc単体の話に留めます
+<ul>
+<li>R/R MarkdownやQuartoの話も入れると発散してしまうので･･･</li>
+</ul></li>
+<li>Windowsで動作確認。Wordだし。
+<ul>
+<li>ただしコマンドの一部はGit Bash上のものになってます･･･</li>
+</ul></li>
+<li>フィルタの話も今回は基本的にお休み
+<ul>
+<li>Luaフィルタがすごい進化していてついていけてません･･･</li>
+</ul></li>
+<li>今回は表紙ページの差し替えの応用例を中心に。
+<ul>
+<li>奥付も一応出来た。</li>
+</ul></li>
+<li>先に言っておくけど･･･
+<ul>
+<li>Pandoc 3.3ではWordのテンプレートはまだ使いにくいです･･･</li>
+</ul></li>
+<li>ChatGPT（課金）は嘘ばっかり言ってくるので注意ね
+<ul>
+<li>他のAIは試してません</li>
+</ul></li>
+</ul>
+</section>
+<section id="現時点で何が出来るのか" class="level2">
+<h2 class="anchored" data-anchor-id="現時点で何が出来るのか">現時点で何が出来るのか？</h2>
+<ul>
+<li>テンプレートの恩恵を受けられる。
+<ul>
+<li>あらかじめ決められた順序で表示する場合に向いている。</li>
+<li>値がない場合も違和感なく非表示に出来る</li>
+<li>値を列挙するときの表示の仕方を制御できる</li>
+<li>メタデータ/変数で値を与えることに意味がある場合に有効</li>
+<li>フィルタを書くよりは敷居が低い。複雑さも少ない。
+<ul>
+<li>しかし細かい制御や応用はできない。</li>
+</ul></li>
+<li>データと処理を分離出来る。
+<ul>
+<li>データはyamlに分離してフィルタで処理すればいいという話はある。</li>
+<li>そもそもluaフィルタ使えばなんとでもなることが多い</li>
+</ul></li>
+</ul></li>
+<li>具体的な作例
+<ul>
+<li>表紙ページを変更（著者名先頭にもってくるとか、並べるとか自由に出来る）
+<ul>
+<li>docxは固定順序であった。対応するメタデータが存在すると表示される。</li>
+</ul></li>
+<li>奥付の作成など(sky_y氏インスパイア)</li>
+</ul></li>
+<li>基本的な手順
+<ul>
+<li>適宜修正したテンプレートに変数/メタデータで値を埋め込みファイルを作成</li>
+<li>最終的な出力を作る際に、出来上がったファイルを<code>--include-before(after)-body</code>で取り込み挿入する。</li>
+</ul></li>
+</ul>
+</section>
+<section id="docxならではの事情" class="level2">
+<h2 class="anchored" data-anchor-id="docxならではの事情">docxならではの事情</h2>
+<ul>
+<li><p>スタイルは文書全体で共有するため、テンプレートでは扱えない。</p>
+<ul>
+<li>reference.docxで管理する。</li>
+</ul></li>
+<li><p>セクションは扱える。セクションを使えばテンプレート内のページ設定を変えることは可能。</p>
+<ul>
+<li>縦/横</li>
+<li>ページのサイズ・余白</li>
+<li>ページ内上寄せ/下寄せ</li>
+<li>段組み変更</li>
+<li>デフォルトの紙面の設定はreference.docx内にある。</li>
+</ul></li>
+<li><p>表紙のこと以外は raw記法を使えば今までもLua filterで出来た事ではある。 *　セクション挿入する、toc挿入する･･･などは出来る。</p></li>
+<li><p>既往のdocxファイルを(unzipしたのち）タグを適宜修正して挿入してうまくいくケースもあるかも。</p></li>
+</ul>
+</section>
+<section id="現時点で何が出来ないのか" class="level2">
+<h2 class="anchored" data-anchor-id="現時点で何が出来ないのか">現時点で何が出来ないのか？</h2>
+<ul>
+<li>Pandocには<code>--to oxml</code>がない（大問題）</li>
+<li><code>--to docx</code>でTemplateを使うとdocument.xmlが不完全になる
+<ul>
+<li>参照すべき他のxmlへのリンクがないなど）ので正しいdocxをつくれない（=MS Wordで開けない）</li>
+</ul></li>
+<li>出力形式を指定しないとHTMLとして出力される。本文に文字列が入っているとHTMLタグに囲われる</li>
+<li>odt (OpenOffice text document)の <code>opendocument</code> のように、 <code>docx</code> にも <code>openxml</code> 出力形式が追加されればもう少し楽に出来るのだが･･･</li>
+</ul>
+</section>
+</section>
+<section id="pandocs-template-導入編" class="level1">
+<h1>Pandoc’s Template 導入編</h1>
+<section id="pandocのテンプレート機能" class="level2">
+<h2 class="anchored" data-anchor-id="pandocのテンプレート機能">Pandocのテンプレート機能</h2>
+<ul>
+<li><p>変数を使い、テンプレート内に文字列を挿入するなどしてファイルを作ることが出来る。</p>
+<ul>
+<li><a href="https://pandoc.org/MANUAL.html#templates">Pandoc User’s Guide — Template</a></li>
+</ul></li>
+<li><p>Pandoc単体で実行可能</p>
+<ul>
+<li>環境構築せずすぐ使える</li>
+</ul></li>
+<li><p>Templateにはifやforなどがあるので色々出来そうだが出来ない。</p></li>
+<li><p>基本的なフォーマットが決まっていて値を置き換えるのに使う。</p>
+<ul>
+<li>ifは値があるかないかチェックでの分岐</li>
+<li>forは全ての要素それぞれで置換して列挙</li>
+<li>サブテンプレートの埋め込み（Partials）</li>
+<li>その他体裁を整える機能（Nesting、Breakable Spaces）</li>
+<li>変数の文字列に対する処理（Pipe）</li>
+</ul></li>
+<li><p>複雑な処理をしたければLua filterを使う。 ## テンプレートに値をセットする方法</p></li>
+<li><p>データの種類としては変数（Variable）とメタデータがある。</p></li>
+<li><p>メタデータは一般的に（？）MarkdownファイルのYAMLブロックに入れる事が多いが引数（<code>-M/--metadata</code>）でも与えられる。</p></li>
+<li><p>テンプレートの場合は変数の方がメタデータより優先される。</p>
+<ul>
+<li>この挙動についてはこちらの記事を参照 <a href="https://zrbabbler.hatenablog.com/entry/2019/12/04/234053">Pandocでメタデータはテンプレート変数になるかならないか - マクロツイーター</a>
+<ul>
+<li>変数はLuaフィルタから一応は見えるようになったが、値を変更してもPandocの挙動に影響なし=結論変わらず。</li>
+<li>フィルタ自身がテンプレートを扱う場合の動作は未確認。</li>
+</ul></li>
+</ul></li>
+<li><p>メタデータはメタデータファイルとしても与えることが出来る（<code>--metadata-file</code>）</p></li>
+<li><p>細かい話は実践編で。</p></li>
+</ul>
+</section>
+<section id="デフォルトファイルdefaults-filesも使える" class="level2">
+<h2 class="anchored" data-anchor-id="デフォルトファイルdefaults-filesも使える">デフォルトファイル(Defaults files)も使える</h2>
+<ul>
+<li>使い回しがきく設定は、デフォルトファイルにまとめてしまう方がよい。
+<ul>
+<li>デフォルトファイルはメタデータや変数や設定を保存するためのファイル。</li>
+<li>テンプレートとたぶん相性はよい。</li>
+</ul></li>
+<li>使い方は下記の記事を参照するのが良い。基本的な部分は変更ない。
+<ul>
+<li><a href="https://qiita.com/sky_y/items/b243c2618706605e5fdd">[Pandoc 2.8 新機能] 長いオプションをファイルにまとめるDefault file #YAML - Qiita</a></li>
+</ul></li>
+<li>今回のケースでは値の設定は <code>metadata</code>か<code>variable</code>に対してなので次のようにする。（トップ階層に置くのではない）
+<ul>
+<li>詳細はマニュアルを。</li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">metadata</span><span class="kw">:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">title</span><span class="kw">:</span><span class="at"> default-metadata</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">variables</span><span class="kw">:</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">subtitle</span><span class="kw">:</span><span class="at"> default-variable</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="テンプレートの文法変数" class="level2">
+<h2 class="anchored" data-anchor-id="テンプレートの文法変数">テンプレートの文法(変数)</h2>
+<ul>
+<li>変数は<code>$...$</code> か <code>${...}</code> の書式で使う。たまにマニュアルに誤記がある。未指摘。</li>
+<li>コメントは<code>$--</code>で入れる。 リテラル<code>$</code> は　<code>$$</code> と入力。</li>
+<li>テンプレート変数は文字ではじまり、文字、数字、<code>_</code>、&nbsp;<code>-</code>、 <code>.</code>を使える。日本語も使えた。
+<ul>
+<li><code>it</code>,&nbsp;<code>if</code>,&nbsp;<code>else</code>,&nbsp;<code>endif</code>,&nbsp;<code>for</code>,&nbsp;<code>sep</code>, &nbsp;<code>endfor</code> は使えない</li>
+<li>一部、Pandocが使用している変数名がある
+<ul>
+<li>詳しくは <a href="https://pandoc.org/MANUAL.html#variables-set-automatically">Pandoc User’s Guide — Variables set automatically</a> を参照。</li>
+</ul></li>
+</ul></li>
+<li><code>.</code> は構造化された変数（structured variable）に使う。
+<ul>
+<li><code>hoge.fuga</code>みたいにしてアクセスする。</li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hoge</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">fuga</span><span class="kw">:</span><span class="at"> boo</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">piyo</span><span class="kw">:</span><span class="at"> foo</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>変数名に<code>.</code>を入れると上記の仕様からテンプレート側からアクセス出来なくなるので注意。</li>
+<li>YAMLメタデータブロックでは末尾<code>_</code>の変数名は無視されるが、<code>-M</code>や<code>-V</code>は無視されない。
+<ul>
+<li><a href="https://pandoc.org/MANUAL.html#extension-yaml_metadata_block">Pandoc User’s Guide　— Extension:&nbsp;<code>yaml_metadata_block</code></a> ## テンプレートの文法(if)</li>
+</ul></li>
+<li>テンプレート中で<code>$if(変数)$</code>などで 条件分岐が使える。ただし、<code>true</code>か<code>false</code>かだけを判定。比較演算子等はない。
+<ul>
+<li><code>$elseif(変数)</code>や<code>$else$</code>もあるのである程度分岐は出来る。
+<ul>
+<li>tocがある場合のみtoc-titleが表示されるなどで使われている。</li>
+</ul></li>
+<li>詳しくは <a href="https://pandoc.org/MANUAL.html#conditionals">Pandoc User’s Guide — Conditionals</a></li>
+</ul></li>
+<li><code>true</code>となるものは以下の通り
+<ul>
+<li>連想配列（map。<code>key: value</code>のもの）</li>
+</ul></li>
+<li>配列（array, list）のうち、少なくともひとつの<code>true</code>の値をもつもの
+<ul>
+<li>listの中身が全て<code>""</code>なら<code>false</code></li>
+</ul></li>
+<li>空文字<code>""</code>ではない文字列</li>
+<li>booleanの<code>true</code>。<code>-M title</code>のように与えると<code>title</code>はbooleanの<code>true</code>扱い。
+<ul>
+<li><code>-M title=true</code>も同じ。<code>-M title=false</code> は booleanの<code>false</code>扱い。</li>
+</ul></li>
+</ul>
+</section>
+<section id="テンプレートの文法for" class="level2">
+<h2 class="anchored" data-anchor-id="テンプレートの文法for">テンプレートの文法(for)</h2>
+<ul>
+<li><code>$for(変数)$</code>でループ
+<ul>
+<li><a href="https://pandoc.org/MANUAL.html#for-loops">Pandoc User’s Guide — For loops</a></li>
+</ul></li>
+<li>単一の変数（文字列など）はその値のみを反映させて終わり</li>
+<li>list(array)はそれぞれの値を繰り返し適用し</li>
+<li>連想配列(map)はloop内でそのkeyを呼ぶ形で使う。</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">author</span><span class="kw">:</span><span class="at"> </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">"MF2 niszet"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>なら次のようにしてアクセス出来る（ということでいいのか？）</p>
+<pre><code>$for(author)$
+  $it.name$
+$endfor$</code></pre>
+<ul>
+<li>それぞれの値を代入したものが連続して出力されるのは同じ。</li>
+</ul>
+</section>
+<section id="サブテンプレートpartials" class="level2">
+<h2 class="anchored" data-anchor-id="サブテンプレートpartials">サブテンプレート（Partials）</h2>
+<ul>
+<li>別のテンプレートファイルを使い、指定した場所に結果を挿入することが可能。</li>
+<li>拡張子ない場合は呼び出し元のTemplateと拡張子が一致したファイルが選ばれる。</li>
+<li>サブテンプレートにもメタデータ、変数が渡され、置換される。
+<ul>
+<li>呼び出し元/先での使用の有無は関係ないようである。</li>
+</ul></li>
+<li><code>$title:template_sub()$</code> は、<code>title</code>が<code>true</code>である場合に挿入する。ifのように。 * <code>title</code>がarrayの場合は要素分繰り返し適用される。forのように。</li>
+<li>後述のPipesとも組み合わせ可能。<code>$subtemplate()/uppercase$</code> のような形。</li>
+</ul>
+</section>
+<section id="テンプレートの文法pipes" class="level2">
+<h2 class="anchored" data-anchor-id="テンプレートの文法pipes">テンプレートの文法（Pipes）</h2>
+<ul>
+<li><p>テンプレート変数に対して追加の処理を行う。</p></li>
+<li><p>pairs</p>
+<ul>
+<li>mapとarrayをkeyとvalueをもったmapのarrayとする。luaのそれに相当。</li>
+<li>forの中で it.key と it.value で使うのが基本か。</li>
+</ul></li>
+<li><p>uppercase</p>
+<ul>
+<li>文字列のみ。大文字にする。</li>
+</ul></li>
+<li><p>lowercase</p>
+<ul>
+<li>文字列のみ。小文字にする。</li>
+</ul></li>
+<li><p>length</p>
+<ul>
+<li>文字列の場合文字列の長さを得る。<code>"あいうえお"</code>は5となった。</li>
+<li>listはその長さを。 <code>-M title=true</code> <code>-M title=false</code> の場合(boolean)は0となる。</li>
+</ul></li>
+<li><p>reverse</p>
+<ul>
+<li>文字列は逆順にする。<code>"あいうえお"</code>も<code>"おえういあ"</code>となった。</li>
+<li>listも逆順にする。</li>
+</ul></li>
+<li><p>first</p></li>
+<li><p>last</p>
+<ul>
+<li>listの場合最後の要素を取る。
+<ul>
+<li>ひとつの値を期待する場所はこれを付けておくと良いかも。</li>
+</ul></li>
+</ul></li>
+<li><p>rest</p></li>
+<li><p>allbutlast</p></li>
+<li><p>chomp</p></li>
+<li><p>nowrap</p></li>
+<li><p>alpha</p>
+<ul>
+<li>26で割った余りがアルファベットに対応する1がa</li>
+<li>0と26が`になる（zにならない）のだが･･･？？バグか？</li>
+</ul></li>
+<li><p>roman</p>
+<ul>
+<li>数字をローマ数字にする</li>
+</ul></li>
+<li><p>left n “leftborder” “rightborder”</p>
+<ul>
+<li>主に表に使う想定のよう。
+<ul>
+<li><code>$title/right 10 "$" "@"$</code> のようにして使う。</li>
+<li>出力はたとえば <code>$      hoge@</code> のようになる。</li>
+</ul></li>
+<li>左寄せ。nはintegerのみ（変数不可）、区切り文字は<code>""</code>で囲う必要がある。
+<ul>
+<li>区切り文字はオプション。無くてもよい。</li>
+</ul></li>
+<li>文字のみ正しく動作。
+<ul>
+<li>boolean（<code>-M title</code>のような）やlist(array)はNG</li>
+</ul></li>
+<li>文字数はいわゆる全角文字で2文字相当</li>
+<li>枠に入らない場合の分割の挙動はちょっとよくわからず･･･
+<ul>
+<li>(n=奇数で全角文字のみだと半角空白が入る･･･など）</li>
+</ul></li>
+</ul></li>
+<li><p>right n “leftborder” “rightborder”</p>
+<ul>
+<li>右寄せ。他のルールはleftとおなじ。</li>
+</ul></li>
+<li><p>center n “leftborder” “rightborder”</p>
+<ul>
+<li>中央寄せ。同上。</li>
+</ul></li>
+</ul>
+</section>
+<section id="テンプレートの文法-nesting-breakable-spaces" class="level2">
+<h2 class="anchored" data-anchor-id="テンプレートの文法-nesting-breakable-spaces">テンプレートの文法 （Nesting、 Breakable spaces）</h2>
+<ul>
+<li>割愛</li>
+<li>あんまり使い道が分からなかったので･･･</li>
+</ul>
+</section>
+</section>
+<section id="pandocs-template-実践編" class="level1">
+<h1>Pandoc’s Template 実践編</h1>
+<section id="実践-カスタム表紙を作ってみる" class="level2">
+<h2 class="anchored" data-anchor-id="実践-カスタム表紙を作ってみる">実践: カスタム表紙を作ってみる</h2>
+<ul>
+<li>実例がないとわかりづらいので、Pandoc側が想定している使い方（表紙デザインを変更する）を目標にやってみる。</li>
+<li>表紙のtitle,subtitle,date,author,abstract,abstract-titleの表示順序（あるいは非表示）はメタデータに設定していると変更不可だったので、今回のTemplateの導入で出来るメリットとしてはこれ。</li>
+</ul>
+</section>
+<section id="テンプレートを作成する" class="level2">
+<h2 class="anchored" data-anchor-id="テンプレートを作成する">テンプレートを作成する</h2>
+<ul>
+<li><p>テンプレートファイルを生成し、中身を確認してみる。</p></li>
+<li><p>コマンドラインで生成。</p>
+<ul>
+<li><code>pandoc -D&nbsp;openxml</code> または <code>pandoc --print-default-template=openxml</code></li>
+<li>細かいオプションについては <a href="https://pandoc.org/MANUAL.html#option--print-default-template">Pandoc - Pandoc User’s Guide</a>を参照。</li>
+</ul></li>
+<li><p>リリリース時のテンプレートファイルが格納されているポジトリを参照する方法もある。</p>
+<ul>
+<li><a href="https://github.com/jgm/pandoc-templates">GitHub - jgm/pandoc-templates: Templates for pandoc, tagged to release</a>　</li>
+<li>この中の <code>default.openxml</code> が今回追加されたWord向けのテンプレートファイル。</li>
+</ul></li>
+<li><p>このファイルはdocx中にあるdocument.xml（本文）に相当する。</p>
+<ul>
+<li>スタイルなどは含まれない（reference.docx の方で対応する）</li>
+<li>単体で完結しないので、このファイルでdocxを作ってもMS Wordで開けないファイルになる。</li>
+</ul></li>
+</ul>
+<section id="default.template.openxml" class="level3">
+<h3 class="anchored" data-anchor-id="default.template.openxml">default.template.openxml</h3>
+<p>Pandoc 3.3でのopenxmlの中身はこのようになっている。</p>
+<p><code>docx_hyoushi.md</code> を –to docx で生成すると結果がわかりやすい。</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode xml code-with-copy"><code class="sourceCode xml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;?xml</span><span class="ot"> version=</span><span class="st">"1.0"</span><span class="ot"> encoding=</span><span class="st">"UTF-8"</span><span class="fu">?&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:document</span><span class="ot"> xmlns:w=</span><span class="st">"http://schemas.openxmlformats.org/wordprocessingml/2006/main"</span><span class="ot"> xmlns:m=</span><span class="st">"http://schemas.openxmlformats.org/officeDocument/2006/math"</span><span class="ot"> xmlns:r=</span><span class="st">"http://schemas.openxmlformats.org/officeDocument/2006/relationships"</span><span class="ot"> xmlns:o=</span><span class="st">"urn:schemas-microsoft-com:office:office"</span><span class="ot"> xmlns:v=</span><span class="st">"urn:schemas-microsoft-com:vml"</span><span class="ot"> xmlns:w10=</span><span class="st">"urn:schemas-microsoft-com:office:word"</span><span class="ot"> xmlns:a=</span><span class="st">"http://schemas.openxmlformats.org/drawingml/2006/main"</span><span class="ot"> xmlns:pic=</span><span class="st">"http://schemas.openxmlformats.org/drawingml/2006/picture"</span><span class="ot"> xmlns:wp=</span><span class="st">"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"</span>&gt;</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:body</span>&gt;</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>$if(title)$</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"Title"</span> /&gt;</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>      $title$</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>$endif$</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>$if(subtitle)$</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"Subtitle"</span> /&gt;</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>      $subtitle$</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>$endif$</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>$for(author)$</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"Author"</span> /&gt;</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>      $author$</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>$endfor$</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>$if(date)$</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"Date"</span> /&gt;</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>      $date$</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>$endif$</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>$if(abstract)$</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>$if(abstract-title)$</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"AbstractTitle"</span> /&gt;</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:r</span>&gt;&lt;<span class="kw">w:t</span><span class="ot"> xml:space=</span><span class="st">"preserve"</span>&gt;$abstract-title$&lt;/<span class="kw">w:t</span>&gt;&lt;/<span class="kw">w:r</span>&gt;</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>$endif$</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    $abstract$</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>$endif$</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>$for(include-before)$</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    $include-before$</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>$endfor$</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>$if(toc)$</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    $toc$</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>$endif$</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    $body$</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>$for(include-after)$</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    $include-after$</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>$endfor$</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>$-- sectpr will be set to the last sectpr in a reference.docx, if present</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>$if(sectpr)$</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    $sectpr$</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>$else$</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:sectPr</span> /&gt;</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>$endif$</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>  &lt;/<span class="kw">w:body</span>&gt;</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">w:document</span>&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="テンプレートを修正する" class="level2">
+<h2 class="anchored" data-anchor-id="テンプレートを修正する">テンプレートを修正する</h2>
+<ol type="1">
+<li><code>include-before-body</code>　や <code>include-after-body</code> を使いdocxファイルに挿入する場合、挿入箇所にファイルの内容をそのまま追加して、全体で正しいファイルとなるようにしないといけないの
+<ol type="1">
+<li>ファイル先頭の <code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;</code> <code>&lt;document&gt;</code> <code>&lt;w:body&gt;</code> タグと末尾の対応するタグをそれぞれ削除する。</li>
+</ol></li>
+<li>テンプレート内は変数まわりはOOXMLのタグが完備されておらず（一部ある）、単に変数の文字列が代入されただけでは有効なファイルにならない。テンプレート内の<code>$title$</code>などの変数は以下のようなタグで囲む。デフォルトのテンプレートは<code>abstract-title</code>だけこの形式になっている。</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre class="sourceCode xml code-with-copy"><code class="sourceCode xml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"Title"</span> /&gt;</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:r</span>&gt;</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:t</span><span class="ot"> xml:space=</span><span class="st">"preserve"</span>&gt;$title$&lt;/<span class="kw">w:t</span>&gt;</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:r</span>&gt;</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">w:p</span>&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>前処理（フィルタ）で挿入部分をこのタグで囲うようにも出来るが、変数で指定された場合は出来ない
+<ul>
+<li>･･･ので、テンプレートの修正の方が今回は良いと判断。</li>
+<li>さらに、本文側も対応しようとすると、ooxmlカスタムライターをLuaで作成する必要があり･･･
+<ul>
+<li>出来るけど無駄になりそうなのでやってない。</li>
+</ul></li>
+<li>luaフィルタ内でmetaに値を入れるとテンプレートには反映されるのでmetaで統一するのはありかも？</li>
+</ul></li>
+</ul>
+</section>
+<section id="テンプレートを使用する" class="level2">
+<h2 class="anchored" data-anchor-id="テンプレートを使用する">テンプレートを使用する</h2>
+<ul>
+<li><p><code>pandoc --template=テンプレートファイル名</code> で使用出来る。</p></li>
+<li><p>本文に文字列があると ooxmlのタグで囲われずに埋め込まれるため、本文を空にする。</p></li>
+<li><p>HTML形式の出力として扱われるため、 本文があると<code>&lt;p&gt;&lt;/p&gt;</code>として挿入されるので、本文を空にする。</p>
+<ul>
+<li><code>--to plain</code>にしてもよいが、結局はoxmlの適切なタグで囲われていないといけない</li>
+</ul></li>
+</ul>
+<ol type="1">
+<li>標準入力から受ける場合、 <code>-M body=""</code>で消去する。与える変数やメタデータは引数で与える。
+<ol type="1">
+<li></li>
+</ol></li>
+</ol>
+<p><code>echo "" | pandoc -M title=タイトル --template=template.openxml -M body="" -o template.filled.openxml</code></p>
+<ol start="2" type="1">
+<li>ファイル入力を使うなら、本文が空のファイルを使う。
+<ol type="1">
+<li>以下のようにYAMLを与えると（本文が空の）メタデータとして扱われるため良さそう（入出力共にMarkdown扱い。ymlやyamlは対応していないのでWarning出る。嫌ならmdにしておいてもよい。）</li>
+</ol></li>
+</ol>
+<p><code>pandoc --template=template.openxml setting.yml -o template.filled.openxml</code></p>
+<ol start="3" type="1">
+<li><p>別に本文があっても<code>-M body=""</code> で消せば良いので、入力は本文があっても良い(YAML部分だけ設定に使う)</p>
+<p>　<code>pandoc --template=template.openxml input.md -o template.filled.openxml -M body=""</code></p></li>
+</ol>
+<p>ただし、表紙と本文でメタデータを変えないとタイトルが2回現れることになるので注意。</p>
+</section>
+<section id="テンプレート変数の細かい話" class="level2">
+<h2 class="anchored" data-anchor-id="テンプレート変数の細かい話">テンプレート変数の細かい話</h2>
+<p>メタデータではなく、テンプレート変数でも値をセットできるが、以下の注意点がある。</p>
+<ul>
+<li>テンプレート変数(<code>-V</code>)の <code>true</code> / <code>false</code> は論理値の <code>true</code> / <code>false</code> ではなく、文字列の <code>"true"</code> / <code>"false"</code> になる。
+<ul>
+<li><code>-M title</code> のように値をセットしない（あるいは <code>true</code> を指定する）とテンプレートには <code>true</code> の文字が入る</li>
+<li>複数回指定すると、list(array)扱いになる。</li>
+</ul></li>
+<li>テンプレートの場合、-V と -M は-Vが指定されていれば-Vの方が優先される。
+<ul>
+<li>補足ページで後述。</li>
+</ul></li>
+<li>-M はエスケープされる。-Vはされない。
+<ul>
+<li><code>-M title="&lt;hoge&gt;"</code> は <code>&amp;lt;hoge&amp;gt;</code> がテンプレートに埋め込まれるが、 <code>-V title="&lt;hoge&gt;"</code> はそのまま <code>&lt;hoge&gt;</code> が埋め込まれる。</li>
+<li>これはYAMLがMarkdownとして読まれることに起因している、らしい。</li>
+</ul></li>
+<li>また、 <code>--toc</code> はテンプレートに対しては無効。
+<ul>
+<li><code>-M toc=true</code>などで明示的な値の指定が必要。</li>
+</ul></li>
+</ul>
+</section>
+<section id="作成したファイルを確認する" class="level2">
+<h2 class="anchored" data-anchor-id="作成したファイルを確認する">作成したファイルを確認する</h2>
+<ul>
+<li>意図通りに値が入っているか確認しましょう。</li>
+<li>Templateの場合は標準出力に出力できるので便利は便利･･･。</li>
+</ul>
+</section>
+<section id="作成したファイルを挿入する" class="level2">
+<h2 class="anchored" data-anchor-id="作成したファイルを挿入する">作成したファイルを挿入する</h2>
+<ul>
+<li><code>--include-before-body | -B</code>で本文の前に作成したファイルを追加。<code>--include-after-body | -A</code> で本文のあとに追加。</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> <span class="at">--from</span> markdown&nbsp;input.md&nbsp;--to docx <span class="at">--include-before-body</span><span class="op">=</span>template.filled.openxml <span class="at">-o</span> out.docx <span class="at">--toc</span> <span class="at">--reference-doc</span> custom_reference.docx</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>カスタム表紙作成の場合、本体の方には挿入するファイルで指定した <code>title</code> などのメタデータを与えないようにする(当然、2回出てくる)</li>
+<li>挿入場所はTemplateの構成が参考になる（<code>include-before-body</code>とか）</li>
+</ul>
+</section>
+<section id="補足-メタデータの強弱1.原則" class="level2">
+<h2 class="anchored" data-anchor-id="補足-メタデータの強弱1.原則">補足: メタデータの強弱(1.原則)</h2>
+<ul>
+<li>Pandocはメタデータの与え方がいくつかある。
+<ul>
+<li>入力ファイルのYAML部分</li>
+<li><code>--metafata-file</code>で与えるYAMLファイル</li>
+<li>オプションの <code>-M</code>　で与える値</li>
+<li>Default file中の <code>metadata</code> の値</li>
+</ul></li>
+<li>これらのメタデータには指定方法によって強弱（優先）関係がある。</li>
+<li>メタデータ指定時の強度は以下の通り。</li>
+</ul>
+<pre><code>default fileのmetadataの値 &gt;= -M（引数で与える）の値 &gt; input.md の YAML &gt; --metadata-file の YAML</code></pre>
+<ul>
+<li>メタデータファイルの方が弱い点は注意。
+<ul>
+<li>default fileと-Mの関係ついては別途注意事項あり（後述）</li>
+<li>この関係はマニュアルから読み取れないこともない･･･</li>
+</ul></li>
+</ul>
+</section>
+<section id="補足-メタデータの強弱2.同強度で複数指定した場合" class="level2">
+<h2 class="anchored" data-anchor-id="補足-メタデータの強弱2.同強度で複数指定した場合">補足: メタデータの強弱(2.同強度で複数指定した場合)</h2>
+<ul>
+<li>-M 指定の場合、値はarray(list)となり、受ける側がひとつの値を取る場合は要素をつなげたものになる。
+<ul>
+<li>入力例: <code>-M title=xxx -M title=ooo</code></li>
+<li>以下のような与え方と同じ。 <code>title:         - xxx         - ooo</code></li>
+</ul></li>
+<li>値を受ける側が複数受けられる場合は、それぞれの値が入る。
+<ul>
+<li>例: <code>-M author=A -M author=B</code> Author AとAuthor Bがそれぞれ追加される
+<ul>
+<li>目安はTemplate中で<code>$for$</code> を使っている箇所。</li>
+</ul></li>
+</ul></li>
+<li>metadata-fileはあとから指定したもので上書きされる。
+<ul>
+<li>例： <code>--metadata-file=input_meta.yml --metadata-file=input_meta2.yml</code> のように複数指定した場合、キーの重複があるとあとから指定した値が有効（値は結合されず置き換わる。重複がなければ先に指定した値は有効。）</li>
+<li>authorも上書きされた。</li>
+<li></li>
+</ul></li>
+<li>default fileもあとから指定した物で上書きされる。metadata-fileと同じ挙動。
+<ul>
+<li>例： <code>--defaults=default.yaml --defaults=default2.yaml</code> のように複数指定した場合、キーの重複があるとあとから指定した値が有効（値は結合されず置き換わる。重複がなければ先に指定した値は有効。）</li>
+<li>authorも上書きされた。</li>
+</ul></li>
+<li>入力ファイルのYAMLもあとから指定した物で上書きされる。
+<ul>
+<li><code>input.md input2.md</code> のように複数指定した場合、キーの重複があるとあとから指定した値が有効（値は結合されず置き換わる。重複がなければ先に指定した値は有効。）</li>
+<li>authorも上書きされた。</li>
+</ul></li>
+</ul>
+</section>
+<section id="補足-メタデータの強弱3-defaults-files-と--m-の衝突" class="level2">
+<h2 class="anchored" data-anchor-id="補足-メタデータの強弱3-defaults-files-と--m-の衝突">補足: メタデータの強弱(3 Defaults files と -M の衝突）</h2>
+<ul>
+<li>指定順で挙動が異なる。<code>--defaults</code> より前に指定した<code>-M</code> は無視され、あとに指定したものは複数の<code>-M</code>のケースと同じ。
+<ul>
+<li>titleのようにひとつの値を受け取る場合、</li>
+<li><code>--defaults=default.yaml -M title=hoge</code> は <code>defaulthoge</code> となる</li>
+<li><code>-M title=hoge --defaults=default.yaml</code> は <code>default</code>　となる（<code>hoge</code>は無視される）</li>
+<li>意図した挙動なのかは不明。</li>
+<li>外部ツールにより、引数指定順序が制御出来ない場合はこれらの例外ケースに注意。
+<ul>
+<li>･･･なのだが、こんなことを考えるほど込み入った状況を作らない方が大事。</li>
+</ul></li>
+<li>引数末尾に指定すれば<code>defaults</code>が優先されるので、設定次第で<code>-M</code>を全て帳消しに出来る･･･</li>
+</ul></li>
+<li>複数指定となってlistとなった場合（文字列が結合される）は出力に下記のようなWARNINGが出るが、後者は出てこないので気づきにくい。</li>
+</ul>
+<pre><code>[WARNING] This document format requires a nonempty &lt;title&gt; element.
+Defaulting to 'input' as the title.
+To specify a title, use 'title' in metadata or --metadata title="...".</code></pre>
+</section>
+<section id="補足-どうにかして入植した値をキャンセルできないのか" class="level2">
+<h2 class="anchored" data-anchor-id="補足-どうにかして入植した値をキャンセルできないのか">補足: どうにかして入植した値をキャンセルできないのか･･･</h2>
+<ul>
+<li>現状既に与えたメタデータを打ち消す方法は素のPandocにはなさそう。
+<ul>
+<li>nullなどを与えても文字列になる。</li>
+<li>lua filterを使えばいける。</li>
+</ul></li>
+<li><code>-M</code> や <code>-V</code> は追加していくとarrayになる。
+<ul>
+<li>arrayになると文字列期待の場合は要素をconcatされて困る･･･</li>
+<li>･･･という場合、Templateであれば、pipeのlastを使っておく方法がある。単一値を期待している場合に有効。</li>
+<li>これであれば、最後に指定した値を常に使うので、複数値が入ってString期待がarrayになって困るということはなくなる。</li>
+<li>1要素であっても問題なく振る舞うので通常の用途でも問題ない。</li>
+</ul></li>
+<li>デフォルトファイルに変数を与えておき、フィルタで処理を噛ませて変数を追加、テンプレートでは最後の値を使うということなどが出来る。</li>
+</ul>
+</section>
+<section id="番外編-2段組からの切り替え" class="level2">
+<h2 class="anchored" data-anchor-id="番外編-2段組からの切り替え">番外編 2段組からの切り替え</h2>
+<ul>
+<li>セクション区切りを使うことで、段組を変更出来る。</li>
+<li><code>&lt;w:sectPr&gt;</code> はドキュメント最後以外は <code>&lt;w:p&gt;</code> タグ中に入れる。</li>
+<li>Templateを使う場合は以下のように修正すれば良い（例）
+<ul>
+<li>特定箇所に挿入するだけなので、divとclassでlua filterでもいい。</li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="sourceCode xml code-with-copy"><code class="sourceCode xml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>$-- sectpr will be set to the last sectpr in a reference.docx, if present</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>$if(sectpr)$</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:p</span>&gt;&lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:sectPr</span>&gt;</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:pgSz</span><span class="ot"> w:w=</span><span class="st">"12240"</span><span class="ot"> w:h=</span><span class="st">"15840"</span>/&gt;</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:pgMar</span><span class="ot"> w:top=</span><span class="st">"1985"</span><span class="ot"> w:right=</span><span class="st">"1701"</span><span class="ot"> w:bottom=</span><span class="st">"1701"</span><span class="ot"> w:left=</span><span class="st">"1701"</span><span class="ot"> w:header=</span><span class="st">"720"</span><span class="ot"> w:footer=</span><span class="st">"720"</span><span class="ot"> w:gutter=</span><span class="st">"0"</span>/&gt;</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:cols</span><span class="ot"> w:num=</span><span class="st">"2"</span><span class="ot"> w:space=</span><span class="st">"720"</span>/&gt;</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">w:sectPr</span>&gt;</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">w:pPr</span>&gt;&lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>$else$</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:sectPr</span> /&gt;</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>$endif$</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.sectionproperties?view=openxml-3.0.1">SectionProperties Class (DocumentFormat.OpenXml.Wordprocessing) | Microsoft Learn</a></p>
+</section>
+<section id="実践-奥付を作ってみる" class="level2">
+<h2 class="anchored" data-anchor-id="実践-奥付を作ってみる">実践: 奥付を作ってみる</h2>
+<ul>
+<li>sky_y氏の記事のWord版
+<ul>
+<li><a href="https://qiita.com/sky_y/items/47da01623f50380c2023">Pandocのテンプレート機能でYAMLから本の奥付を自動生成する #Markdown - Qiita</a></li>
+<li>基本的にやることは同じ。ooxml特有の注意点だけ。</li>
+</ul></li>
+<li>Wordのrefrence.docxに奥付用のスタイルを作っておく
+<ul>
+<li>未定義のスタイルを指定しても一覧に出ない（MS Wordのスタイルに関する挙動が変わった？）</li>
+</ul></li>
+<li>セクションを切り、ページの設定で下揃えにするテンプレートをつくっておく
+<ul>
+<li>sectPrはこのあたりで　<a href="http://www.officeopenxml.com/WPsection.php">Office Open XML - Word Processing - Sections</a></li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="sourceCode xml code-with-copy"><code class="sourceCode xml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>$-- セクションを切る。奥付より前のページの設定なのでこの部分は別途与えられる方が良い。</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>$-- 自由度を高めたいならlua、固定ならdefaultsのvariables指定が良い。</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>$-- if(size.A4)などで分岐して、it.pgSzで取るような記法？（未実施）</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>$-- ここまでを2段組みにする</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:p</span>&gt;&lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:sectPr</span>&gt;</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">w:pgSz</span><span class="ot"> w:w=</span><span class="st">"11906"</span><span class="ot"> w:h=</span><span class="st">"16838"</span>/&gt;</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">w:pgMar</span><span class="ot"> w:top=</span><span class="st">"1985"</span><span class="ot"> w:right=</span><span class="st">"1701"</span><span class="ot"> w:bottom=</span><span class="st">"1701"</span><span class="ot"> w:left=</span><span class="st">"1701"</span><span class="ot"> w:header=</span><span class="st">"720"</span><span class="ot"> w:footer=</span><span class="st">"720"</span><span class="ot"> w:gutter=</span><span class="st">"0"</span>/&gt;</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">w:cols</span><span class="ot"> w:num=</span><span class="st">"2"</span><span class="ot"> w:space=</span><span class="st">"720"</span>/&gt;</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">w:sectPr</span>&gt;</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">w:pPr</span>&gt;&lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>$-- 文章固定ならそのまま埋めておいても良い気がしますが</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>$for(okuduke.message)$</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"Okuduke"</span> /&gt;</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">w:r</span>&gt;</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:t</span><span class="ot"> xml:space=</span><span class="st">"preserve"</span>&gt;$okuduke.message$&lt;/<span class="kw">w:t</span>&gt;</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  &lt;/<span class="kw">w:r</span>&gt;</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>$endfor$</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>$-- 改行で揃える場合、revの数、messageの数で調整か？</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>$-- OkudukeTitleなどのスタイルは本体のreference.docxに設定しておくこと。</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"OkudukeTitle"</span> /&gt;</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:r</span>&gt;</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:t</span><span class="ot"> xml:space=</span><span class="st">"preserve"</span>&gt;$title$&lt;/<span class="kw">w:t</span>&gt;</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:r</span>&gt;</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>$if(subtitle)$</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"OkudukeTitle"</span> /&gt;</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>      &lt;<span class="kw">w:r</span>&gt;</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">w:t</span><span class="ot"> xml:space=</span><span class="st">"preserve"</span>&gt;$subtitle$&lt;/<span class="kw">w:t</span>&gt;</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>      &lt;/<span class="kw">w:r</span>&gt;</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>$endif$</span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>$-- 複数の値を入れられると2版などの情報も入れられる。</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>$for(okuduke.rev)$</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"Okuduke"</span> /&gt;</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>  &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">w:r</span>&gt;</span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:t</span><span class="ot"> xml:space=</span><span class="st">"preserve"</span>&gt;$it.revision$: $it.date$ &lt;/<span class="kw">w:t</span>&gt;</span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>  &lt;/<span class="kw">w:r</span>&gt;</span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>$endfor$</span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:p</span>&gt;&lt;<span class="kw">w:r</span>&gt;&lt;<span class="kw">w:pict</span>&gt;</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">v:rect</span><span class="ot"> style=</span><span class="st">"width:212.7pt;height:1.5pt"</span><span class="ot"> o:hrpct=</span><span class="st">"500"</span><span class="ot"> o:hralign=</span><span class="st">"center"</span><span class="ot"> o:hrstd=</span><span class="st">"t"</span><span class="ot"> o:hr=</span><span class="st">"t"</span>/&gt;</span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">w:pict</span>&gt;&lt;/<span class="kw">w:r</span>&gt;&lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>$for(okuduke.okuduke)$</span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:pStyle</span><span class="ot"> w:val=</span><span class="st">"Okuduke"</span> /&gt;</span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>  &lt;/<span class="kw">w:pPr</span>&gt;</span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">w:r</span>&gt;</span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>  $-- MS Word上で半角スペースで位置合わせは難しい。表として埋め込んだ方が良いかもしれない</span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>  $-- その場合はMarkdownのTemplateで変換した方がマシ･･･</span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">w:t</span><span class="ot"> xml:space=</span><span class="st">"preserve"</span>&gt;$it.key/left 10 "" " "$   $it.value$&lt;/<span class="kw">w:t</span>&gt;</span>
+<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a>  &lt;/<span class="kw">w:r</span>&gt;</span>
+<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a>$endfor$</span>
+<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:p</span>&gt;&lt;<span class="kw">w:r</span>&gt;&lt;<span class="kw">w:pict</span>&gt;</span>
+<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>  &lt;<span class="kw">v:rect</span><span class="ot"> style=</span><span class="st">"width:212.7pt;height:1.5pt"</span><span class="ot"> o:hrpct=</span><span class="st">"500"</span><span class="ot"> o:hralign=</span><span class="st">"center"</span><span class="ot"> o:hrstd=</span><span class="st">"t"</span><span class="ot"> o:hr=</span><span class="st">"t"</span>/&gt;</span>
+<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">w:pict</span>&gt;&lt;/<span class="kw">w:r</span>&gt;&lt;/<span class="kw">w:p</span>&gt;</span>
+<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a>$-- ページ下部揃えなどはここに。末尾のセクションなのでこれでいい（はず）</span>
+<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:sectPr</span>&gt;</span>
+<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:pgSz</span><span class="ot"> w:w=</span><span class="st">"11906"</span><span class="ot"> w:h=</span><span class="st">"16838"</span><span class="ot"> w:code=</span><span class="st">"1"</span>/&gt;</span>
+<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:pgMar</span><span class="ot"> w:top=</span><span class="st">"1985"</span><span class="ot"> w:right=</span><span class="st">"1701"</span><span class="ot"> w:bottom=</span><span class="st">"1701"</span><span class="ot"> w:left=</span><span class="st">"1701"</span><span class="ot"> w:header=</span><span class="st">"720"</span><span class="ot"> w:footer=</span><span class="st">"720"</span><span class="ot"> w:gutter=</span><span class="st">"0"</span>/&gt;</span>
+<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:cols</span><span class="ot"> w:space=</span><span class="st">"720"</span>/&gt;</span>
+<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">w:vAlign</span><span class="ot"> w:val=</span><span class="st">"bottom"</span>/&gt;</span>
+<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">w:sectPr</span>&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>ページ内で上揃え、下揃えを変えることはできない。
+<ul>
+<li>注意系の文言は下に。もし分けたいなら</li>
+<li>空行数をテンプレートで臨機応変に変えられないので（for文で入れることは出来るが）</li>
+<li>インデント数もレンダリングの表示を見て判断
+<ul>
+<li>Tableで罫線なしスタイルを使えればいける･･･？（未調査）</li>
+</ul></li>
+</ul></li>
+<li>奥付生成用のデータはYAMLで（元記事と同じ）</li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span><span class="kw">:</span><span class="at"> PandocのWordテンプレート機能を試してみる</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">subtitle</span><span class="kw">:</span><span class="at"> すごくつらい！</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">author</span><span class="kw">:</span><span class="at"> niszet</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">okuduke</span><span class="kw">:</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">message</span><span class="kw">:</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> 無断掲載禁止！</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> 不備があったら連絡してね！</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">rev</span><span class="kw">:</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">revision</span><span class="kw">:</span><span class="at"> 初版</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">date</span><span class="kw">:</span><span class="at"> 2024年8月13日</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">revision</span><span class="kw">:</span><span class="at"> 2版</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">date</span><span class="kw">:</span><span class="at"> 2024年8月15日</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">okuduke</span><span class="kw">:</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">key</span><span class="kw">:</span><span class="at"> 発行</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">value</span><span class="kw">:</span><span class="at"> niszet工房</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">key</span><span class="kw">:</span><span class="at"> 著者</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">value</span><span class="kw">:</span><span class="at"> niszet0</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">key</span><span class="kw">:</span><span class="at"> 連絡先</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">value</span><span class="kw">:</span><span class="at"> niszet_dev@gmail.com</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">key</span><span class="kw">:</span><span class="at"> Twitter</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">value</span><span class="kw">:</span><span class="at"> \@niszet0</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">key</span><span class="kw">:</span><span class="at"> Webサイト</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">value</span><span class="kw">:</span><span class="at">  https://niszet.hatenablog.com/</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">key</span><span class="kw">:</span><span class="at"> 印刷所</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">value</span><span class="kw">:</span><span class="at"> niszet工房内プリンタ</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>生成したファイルを<code>include-after-body</code>で挿入する。</li>
+</ul>
+</section>
+</section>
+<section id="完全に余談" class="level1">
+<h1>完全に余談</h1>
+<ul>
+<li>reference.docxで使用されているスタイルに変更があった（通常のWordの初期設定に寄せたもの）
+<ul>
+<li>有効になる設定が増えているはず。ほぼそのまま出来る（？）</li>
+</ul></li>
+<li>リストと表関係に何度かupdateあり</li>
+<li>その他細々あるが、未調査です･･･</li>
+<li>Tableの幅の機能を調査中。docxの挙動これでいいのか？</li>
+<li>luaフィルタは調査中。</li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
